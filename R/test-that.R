@@ -32,63 +32,27 @@ test_that <- function(desc, code) {
 }
 
 test_code <- function(test, code, env = test_env()) {
-  get_reporter()$start_test(context = get_reporter()$.context, test = test)
-  on.exit(get_reporter()$end_test(context = get_reporter()$.context, test = test))
+  start_test(test)
+  on.exit(end_test(test))
 
-  ok <- TRUE
-  register_expectation <- function(e, start_frame, end_frame) {
-    calls <- sys.calls()[start_frame:end_frame]
-    srcref <- find_first_srcref(calls)
-
-    e <- as.expectation(e, srcref = srcref)
-    e$call <- calls
-    e$test <- test %||% "(unknown)"
-    ok <<- ok && expectation_ok(e)
-    get_reporter()$add_result(context = get_reporter()$.context, test = test, result = e)
-  }
-
-  frame <- sys.nframe()
-  handle_error <- function(e) {
-    # Capture call stack, removing last two calls from end (added by
-    # withCallingHandlers), and first frame + 7 calls from start (added by
-    # tryCatch etc)
-    e$call <- sys.calls()[(frame + 11):(sys.nframe() - 2)]
-
-    register_expectation(e, frame + 11, sys.nframe() - 2)
-    signalCondition(e)
-  }
-  handle_expectation <- function(e) {
-    register_expectation(e, frame + 11, sys.nframe() - 6)
-    invokeRestart("continue_test")
-  }
-  handle_warning <- function(e) {
-    register_expectation(e, frame + 11, sys.nframe() - 6)
-    invokeRestart("muffleWarning")
-  }
-  handle_message <- function(e) {
-    invokeRestart("muffleMessage")
-  }
-  handle_skip <- function(e) {
-    register_expectation(e, frame + 11, sys.nframe() - 2)
-    signalCondition(e)
-  }
-
+  status <- new.env(parent = emptyenv())
+  handlers <- generate_handlers(status)
   test_env <- new.env(parent = env)
   tryCatch(
     withCallingHandlers(
       eval(code, test_env),
-      expectation = handle_expectation,
-      skip =        handle_skip,
-      warning =     handle_warning,
-      message =     handle_message,
-      error =       handle_error
+      expectation = handlers$expectation,
+      skip =        handlers$skip,
+      warning =     handlers$warning,
+      message =     handlers$message,
+      error =       handlers$error
     ),
     # error/skip silently terminate code
     error = function(e) {},
     skip =  function(e) {}
   )
 
-  invisible(ok)
+  invisible(status$ok)
 }
 
 #' R package to make testing fun!

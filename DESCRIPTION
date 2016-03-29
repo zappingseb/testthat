@@ -46,6 +46,7 @@ Collate:
     'expect-that.R'
     'expectation.R'
     'expectations-matches.R'
+    'handlers.R'
     'make-expectation.R'
     'mock.R'
     'old-school.R'

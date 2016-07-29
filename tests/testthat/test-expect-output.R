@@ -29,7 +29,7 @@ test_that("... passed on to grepl", {
 
 test_that("expect_output_file works, also with incomplete last line", {
   file <- tempfile()
-  writeLines("Hi!", file)
+  write_lines_utf8("Hi!", file)
   expect_success(expect_output_file(cat("Hi!"), file))
   expect_success(expect_output_file(cat("Hi!\n"), file))
   expect_failure(expect_output_file(cat("Hi!\n\n"), file))

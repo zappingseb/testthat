@@ -36,7 +36,7 @@ evaluate_promise <- function(code, print = FALSE) {
     invokeRestart("muffleMessage")
   }
 
-  temp <- file()
+  temp <- file(encoding = "UTF-8")
   on.exit(close(temp))
 
   result <- with_sink(temp,
@@ -52,7 +52,7 @@ evaluate_promise <- function(code, print = FALSE) {
     with_sink(temp, print(result$value))
   }
 
-  output <- paste0(readLines(temp, warn = FALSE), collapse = "\n")
+  output <- paste0(readLines(temp, warn = FALSE, encoding = "UTF-8"), collapse = "\n")
 
   list(
     result = result$value,
@@ -106,7 +106,7 @@ capture_output <- function(code, print = FALSE) {
 }
 
 capture_output_as_vector <- function(code, print) {
-  temp <- file()
+  temp <- file(encoding = "UTF-8")
   on.exit(close(temp), add = TRUE)
 
   result <- with_sink(temp, withVisible(code))
@@ -114,7 +114,7 @@ capture_output_as_vector <- function(code, print) {
     with_sink(temp, print(result$value))
   }
 
-  readLines(temp, warn = FALSE)
+  readLines(temp, warn = FALSE, encoding = "UTF-8")
 }
 
 with_sink <- function(connection, code, ...) {

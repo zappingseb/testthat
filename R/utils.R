@@ -38,14 +38,30 @@ first_last <- function(x, max = 10, filler = "...") {
   }
 }
 
-safe_read_lines <- function(file) {
+read_lines_utf8 <- function(path) {
+  con <- file(path, encoding = "UTF-8")
+  on.exit(close(con), add = TRUE)
+  readLines(con, warn = FALSE, encoding = "UTF-8")
+}
+
+safe_read_lines_utf8 <- function(path) {
   tryCatch(
-    readLines(file, warn = FALSE),
+    read_lines_utf8(path),
     error = function(e) {
       warning(conditionMessage(e), call. = NULL)
       character()
     }
   )
+}
+
+write_lines_utf8 <- function(text, path) {
+  con <- file(path, open = "wb")
+  on.exit(close(con), add = TRUE)
+
+  text <- paste0(paste(text, collapse = "\n"), "\n")
+  text <- enc2utf8(text)
+  text <- iconv(text, from = "UTF-8", to = "UTF-8", toRaw = TRUE)[[1]]
+  writeBin(text, con)
 }
 
 

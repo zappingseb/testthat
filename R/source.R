@@ -13,7 +13,7 @@ source_file <- function(path, env = test_env(), chdir = TRUE) {
   stopifnot(file.exists(path))
   stopifnot(is.environment(env))
 
-  lines <- readLines(path, warn = FALSE)
+  lines <- read_lines_utf8(path)
   srcfile <- srcfilecopy(path, lines, file.info(path)[1, "mtime"], isFile = TRUE)
   exprs <- parse(text = lines, n = -1, srcfile = srcfile)
 

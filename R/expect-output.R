@@ -117,10 +117,10 @@ expect_output_file <- function(object, file, update = FALSE, ...,
 
   withCallingHandlers(
     eval(bquote(
-      expect_equal(output, safe_read_lines(.(file)), ..., info = info, label = lab))),
+      expect_equal(output, safe_read_lines_utf8(.(file)), ..., info = info, label = lab))),
     expectation = function(e) {
       if (update && expectation_failure(e)) {
-        tryCatch(writeLines(output, file), error = function(e) NULL)
+        tryCatch(write_lines_utf8(output, file), error = function(e) NULL)
       }
     }
   )

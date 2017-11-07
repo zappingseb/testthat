@@ -63,8 +63,7 @@ test_dir <- function(path,
                      load_helpers = TRUE,
                      stop_on_failure = FALSE,
                      stop_on_warning = FALSE,
-                     wrap = TRUE
-                     ) {
+                     wrap = TRUE) {
   if (!missing(encoding) && !identical(encoding, "UTF-8")) {
     warning("`encoding` is deprecated; all files now assumed to be UTF-8", call. = FALSE)
   }
@@ -76,7 +75,11 @@ test_dir <- function(path,
   on.exit(source_test_teardown(path, env), add = TRUE)
 
   withr::local_envvar(list(R_TESTS = "", TESTTHAT = "true"))
-  withr::local_options(list(oldie_verbose_retirement = TRUE))
+
+  # Promote retirement stages except on CRAN
+  if (identical(Sys.getenv("NOT_CRAN"), "true")) {
+    withr::local_options(list(lifecycle_verbose_retirement = TRUE))
+  }
 
   paths <- find_test_scripts(path, filter, ...)
 
@@ -94,18 +97,18 @@ test_dir <- function(path,
 #' @rdname test_dir
 test_package <- function(package,
                          filter = NULL,
-                         reporter = default_reporter(),
+                         reporter = check_repoter(),
                          ...,
                          stop_on_failure = TRUE,
-                         stop_on_warning = FALSE
-                         ) {
+                         stop_on_warning = FALSE) {
   library(testthat)
 
   # Ensure that test package returns silently if called recursively - this
   # will occur if test-all.R ends up in the same directory as all the other
   # tests.
-  if (env_test$in_test)
+  if (env_test$in_test) {
     return(invisible())
+  }
 
   env_test$in_test <- TRUE
   env_test$package <- package
@@ -115,8 +118,9 @@ test_package <- function(package,
   })
 
   test_path <- system.file("tests", package = package)
-  if (test_path == "")
+  if (test_path == "") {
     stop("No tests found for ", package, call. = FALSE)
+  }
 
   # If testthat subdir exists, use that
   test_path2 <- file.path(test_path, "testthat")
@@ -144,12 +148,11 @@ test_package <- function(package,
 #' @rdname test_dir
 test_check <- function(package,
                        filter = NULL,
-                       reporter = getOption("testthat.default_check_reporter", "check"),
+                       reporter = check_repoter(),
                        ...,
                        stop_on_failure = TRUE,
                        stop_on_warning = FALSE,
-                       wrap = TRUE
-  ) {
+                       wrap = TRUE) {
   library(testthat)
   require(package, character.only = TRUE)
 
@@ -161,7 +164,7 @@ test_check <- function(package,
   })
 
   test_path <- "testthat"
-  if (!utils::file_test('-d', test_path)) {
+  if (!utils::file_test("-d", test_path)) {
     stop("No tests found for ", package, call. = FALSE)
   }
 

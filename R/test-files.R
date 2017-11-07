@@ -16,10 +16,9 @@ test_files <- function(paths,
                        env = test_env(),
                        stop_on_failure = FALSE,
                        stop_on_warning = FALSE,
-                       wrap = TRUE
-                       ) {
+                       wrap = TRUE) {
   if (length(paths) == 0) {
-    stop('No matching test file in dir')
+    stop("No matching test file in dir")
   }
 
   current_reporter <- find_reporter(reporter)
@@ -99,7 +98,11 @@ test_file <- function(path, reporter = default_reporter(), env = test_env(),
                       encoding = "unknown", wrap = TRUE) {
   library(testthat)
 
-  if (!missing(encoding)) {
+  if (!file.exists(path)) {
+    stop("`path` does not exist", call. = FALSE)
+  }
+
+  if (!missing(encoding) && !identical(encoding, "UTF-8")) {
     warning("`encoding` is deprecated; all files now assumed to be UTF-8", call. = FALSE)
   }
 
@@ -117,10 +120,7 @@ test_file <- function(path, reporter = default_reporter(), env = test_env(),
     reporter <- lister
   }
 
-  on.exit({
-    teardown_run(dirname(path))
-    gc()
-  }, add = TRUE)
+  on.exit(teardown_run(dirname(path)), add = TRUE)
 
   with_reporter(
     reporter = reporter,
@@ -128,8 +128,10 @@ test_file <- function(path, reporter = default_reporter(), env = test_env(),
     {
       lister$start_file(basename(path))
 
-      source_file(path, new.env(parent = env),
-                  chdir = TRUE, wrap = wrap)
+      source_file(
+        path, new.env(parent = env),
+        chdir = TRUE, wrap = wrap
+      )
 
       end_context()
     }

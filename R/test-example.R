@@ -29,6 +29,10 @@ test_examples_source <- function(path = "../..") {
 }
 
 test_examples_installed <- function(package = env_test$package) {
+  if (is.null(package)) {
+    return()
+  }
+
   Rd <- tools::Rd_db(package = package)
   if (length(Rd) == 0) {
     return()
@@ -45,7 +49,7 @@ test_example <- function(path) {
 
   env <- new.env(parent = globalenv())
 
-  ok <- test_code(path, parse(ex_path), env = env)
+  ok <- test_code(path, parse(ex_path, encoding = "UTF-8"), env = env)
   if (ok) succeed(path)
 
   invisible()
@@ -61,7 +65,7 @@ test_rd <- function(rd) {
 
   env <- new.env(parent = globalenv())
 
-  ok <- test_code(path, parse(ex_path), env = env)
+  ok <- test_code(path, parse(ex_path, encoding = "UTF-8"), env = env)
   if (ok) succeed(path)
 
   invisible()

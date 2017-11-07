@@ -8,15 +8,6 @@ starts_with <- function(string, prefix) {
   substr(string, 1, nchar(prefix)) == prefix
 }
 
-console_width <- function() {
-  rstudio <- Sys.getenv("RSTUDIO_CONSOLE_WIDTH")
-  if (identical(rstudio, "")) {
-    getOption("width", 80)
-  } else {
-    as.integer(rstudio)
-  }
-}
-
 is_directory <- function(x) file.info(x)$isdir
 is_readable <- function(x) file.access(x, 4) == 0
 
@@ -63,9 +54,10 @@ env_name <- function(x) {
 
 find_first_srcref <- function(calls) {
   for (call in calls) {
-    srcref <- attr(call, 'srcref')
-    if (!is.null(srcref))
+    srcref <- attr(call, "srcref")
+    if (!is.null(srcref)) {
       return(srcref)
+    }
   }
   NULL
 }

@@ -171,20 +171,30 @@ expect_warning <- function(object, regexp = NULL, ..., all = FALSE,
 #' @export
 #' @rdname output-expectations
 expect_silent <- function(object) {
-  act <- quasi_capture(enquo(object), evaluate_promise)
+  act <- quasi_capture(
+			rlang::enquo(object),
+			evaluate_promise)
 
-  outputs <- c(
-    if (!identical(act$cap$output, "")) "output",
-    if (length(act$cap$warnings) > 0) "warnings",
-    if (length(act$cap$messages) > 0) "messages"
-  )
-
-  expect(
-    length(outputs) == 0,
-    sprintf("%s produced %s.", act$lab, paste(outputs, collapse = ", "))
-  )
-
-  invisible(act$cap$result)
+	outputs <- c(
+			outputs = if (!identical(act$cap$output, "")) act$cap$output,
+			warnings = if (length(act$cap$warnings) > 0) act$cap$warnings %>% 
+						strsplit(split="\n") %>% unlist(),
+			messages = if (length(act$cap$messages) > 0) act$cap$messages %>% 
+						strsplit(split="\n") %>% unlist()
+	)
+	
+	# Create a phrase that contains which outputs and warnings were created
+	outputs_string <- paste0(names(outputs)," = '",outputs,"'") %>%
+			paste0(collapse="\n")
+	
+	# Create the output for the test
+	expect(
+			length(outputs) == 0,
+			#sprintf("%s produced %s.", act$lab, paste(outputs, collapse = ", ")),
+			paste0(act$lab," produced:\n ",output_string)
+	)
+	
+	invisible(act$cap$result)
 }
 
 

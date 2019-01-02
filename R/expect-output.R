@@ -183,15 +183,11 @@ expect_silent <- function(object) {
 						strsplit(split="\n") %>% unlist()
 	)
 	
-	# Create a phrase that contains which outputs and warnings were created
-	outputs_string <- paste0(names(outputs)," = '",outputs,"'") %>%
-			paste0(collapse="\n")
-	
 	# Create the output for the test
 	expect(
 			length(outputs) == 0,
-			#sprintf("%s produced %s.", act$lab, paste(outputs, collapse = ", ")),
-			paste0(act$lab," produced:\n ",output_string)
+			sprintf("%s produced %s.", act$lab, paste0(names(outputs)," = '",outputs,"'") %>%
+							paste0(collapse="\n")),
 	)
 	
 	invisible(act$cap$result)
